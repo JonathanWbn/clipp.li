@@ -1,5 +1,12 @@
 {
   "version": 2,
   "name": "clip.yt",
-  "builds": [{ "src": "next.config.js", "use": "@now/next" }]
+  "builds": [{ "src": "next.config.js", "use": "@now/next" }, { "src": "api/**/*.js", "use": "@now/node@canary" }],
+  "routes": [
+    { "src": "/clip", "methods": ["POST"], "dest": "api/clip/post.js" },
+    { "src": "/clip/.*", "methods": ["GET"], "dest": "api/clip/get.js" }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb-uri"
+  }
 }
