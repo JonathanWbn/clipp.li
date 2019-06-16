@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import Footer from '../components/Footer'
+import Footer from '../components/footer'
 
 export default () => {
   const [youtubeLink, setYoutubeLink] = React.useState('')
