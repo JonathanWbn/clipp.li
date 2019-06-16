@@ -1,5 +1,5 @@
 {
-  "name": "clip.yt",
+  "name": "clipp.li",
   "author": "Jonathan Wieben",
   "dependencies": {
     "axios": "^0.19.0",
@@ -8,5 +8,10 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-plugin-react": "^7.13.0",
+    "prettier": "^1.18.2"
   }
 }
