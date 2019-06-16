@@ -1,9 +1,9 @@
-const { connectToDatabase } = require('../db')
+const { connectToDatabase } = require('./db')
 const url = require('url')
 
 module.exports = async (req, res) => {
   const { pathname } = url.parse(req.url)
-  const slug = pathname.split('/')[2]
+  const slug = pathname.substr(1)
 
   const db = await connectToDatabase(process.env.MONGODB_URI)
 
