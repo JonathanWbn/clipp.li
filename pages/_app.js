@@ -40,7 +40,7 @@ class MyApp extends App {
           }
 
           body {
-            background: #f2e2ce;
+            background: white;
           }
         `}</style>
       </Container>
