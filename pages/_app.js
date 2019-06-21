@@ -20,6 +20,11 @@ class MyApp extends App {
       <Container>
         <Head>
           <link rel="shortcut icon" type="image/png" href="/static/favicon.png" />
+          <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+          <meta name="description" content="Turn YouTube clips into short and beautiful URL's" />
+          <meta name="keywords" content="clippli youtube clip crop bitly" />
+          <meta name="author" content="Jonathan Wieben" />
+          <title>clippli | More than just a clip.</title>
         </Head>
         <Component {...pageProps} />
         <style global jsx>{`
