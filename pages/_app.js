@@ -1,4 +1,5 @@
 import App, { Container } from 'next/app'
+import Head from 'next/head'
 import React from 'react'
 
 class MyApp extends App {
@@ -17,6 +18,9 @@ class MyApp extends App {
 
     return (
       <Container>
+        <Head>
+          <link rel="shortcut icon" type="image/png" href="/static/favicon.png" />
+        </Head>
         <Component {...pageProps} />
         <style global jsx>{`
           html {
