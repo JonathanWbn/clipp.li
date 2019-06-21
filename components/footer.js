@@ -8,7 +8,7 @@ export default function Footer() {
         <a href="https://twitter.com/JoniWieben" target="_blank" rel="noopener noreferrer">
           Twitter
         </a>
-        <a href="mailto:joni.wieben@icloud.com">Contact</a>
+        <a href="/impressum">Impressum</a>
       </footer>
       <style jsx>{`
         footer {

@@ -5,7 +5,7 @@
   "builds": [{ "src": "next.config.js", "use": "@now/next" }, { "src": "api/*.js", "use": "@now/node" }],
   "routes": [
     { "src": "/clip", "methods": ["POST"], "dest": "api/clip.js" },
-    { "src": "/[a-z]+", "methods": ["GET"], "dest": "api/redirect.js" }
+    { "src": "/(?!(impressum))[a-z]+/[a-z]+", "methods": ["GET"], "dest": "api/redirect.js" }
   ],
   "env": {
     "MONGODB_URI": "@mongodb-uri"
