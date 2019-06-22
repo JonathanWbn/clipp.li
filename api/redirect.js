@@ -12,11 +12,26 @@ module.exports = async (req, res) => {
   const clip = await clipsCollection.findOne({ slug })
 
   if (clip) {
+    await saveRedirect()
+
     const redirectUrl = `https://www.youtube.com/embed/${clip.videoId}?start=${clip.start}&end=${clip.end}`
 
     res.writeHead(302, { Location: redirectUrl })
     res.end()
   } else {
     res.send(`There is no clip for ${slug}`)
+  }
+
+  async function saveRedirect() {
+    try {
+      const redirects = clip.redirects ? [...clip.redirects] : []
+      redirects.push({
+        date: Date.now(),
+        userAgent: req.headers['user-agent'],
+      })
+      await clipsCollection.updateOne({ slug }, { $set: { redirects } })
+    } catch (e) {
+      // failing save
+    }
   }
 }
