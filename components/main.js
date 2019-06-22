@@ -14,11 +14,12 @@ const initialFormValues = {
   slug: '',
 }
 const validate = values => ({
-  youtubeLink: !getYoutubeId(values.youtubeLink),
-  start: !isNumber(values.start),
-  end: !isNumber(values.end),
-  slug: !values.slug,
+  youtubeLink: !getYoutubeId(values.youtubeLink) && 'Provide a valid YouTube URL.',
+  start: !isNumber(values.start) && 'Provide a start time.',
+  end: !isNumber(values.end) && 'Provide an end time.',
+  slug: !values.slug && 'Provide an URL ending.',
 })
+const isEmpty = obj => !Object.values(obj).some(Boolean)
 
 export default function Main() {
   const [formValues, setFormValues] = React.useState(initialFormValues)
@@ -26,7 +27,9 @@ export default function Main() {
   const [status, setStatus] = React.useState(null)
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
 
-  React.useEffect(() => setErrors({}), [formValues])
+  React.useEffect(() => {
+    if (!isEmpty(errors)) setErrors(validate(formValues))
+  }, [formValues])
   React.useEffect(() => {
     const timeoutId = ['success', 'failure'].includes(status) && setTimeout(() => setStatus(null), 1000)
     return () => clearTimeout(timeoutId)
@@ -38,7 +41,13 @@ export default function Main() {
     const newErrors = validate(formValues)
     setErrors(newErrors)
 
-    if (Object.values(newErrors).some(Boolean)) return
+    if (!isEmpty(newErrors)) {
+      const [firstInput] = Object.entries(newErrors).map(
+        ([key, value]) => value && document.querySelector(`input[name="${key}"]`)
+      )
+      if (firstInput) firstInput.focus()
+      return
+    }
 
     setStatus('loading')
     axios
@@ -47,9 +56,10 @@ export default function Main() {
         setStatus('success')
         setMostRecentSuccess(slug)
       })
-      .catch(() => {
-        // TODO: do actual error handling
-        setErrors({ slug: true })
+      .catch(error => {
+        setErrors({ slug: error.response.data || error.message })
+        const slugInput = document.querySelector('input[name="slug"]')
+        if (slugInput) slugInput.focus()
         setStatus('failure')
       })
   }
@@ -68,6 +78,7 @@ export default function Main() {
           <div className="row">
             <input
               value={formValues.youtubeLink}
+              name="youtubeLink"
               onChange={e => setFormValues({ ...formValues, youtubeLink: e.target.value })}
               placeholder="YouTube URL"
               className={classnames('youtube-url', errors.youtubeLink && 'error')}
@@ -76,12 +87,14 @@ export default function Main() {
           <div className="row">
             <input
               value={formValues.start}
+              name="start"
               onChange={e => setFormValues({ ...formValues, start: e.target.value })}
               className={classnames(errors.start && 'error')}
               placeholder="Start (sec)"
             />
             <input
               value={formValues.end}
+              name="end"
               onChange={e => setFormValues({ ...formValues, end: e.target.value })}
               className={classnames(errors.end && 'error')}
               placeholder="End (sec)"
@@ -93,10 +106,21 @@ export default function Main() {
             </div>
             <input
               value={formValues.slug}
+              name="slug"
               onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '') })}
               placeholder="URL ending"
               className={classnames(errors.slug && 'error')}
             />
+          </div>
+          <div className="row validations">
+            {Object.values(errors)
+              .filter(Boolean)
+              .map(str => (
+                <>
+                  {str}
+                  <br />
+                </>
+              ))}
           </div>
           <div className="row">
             <Button type="button" onClick={reset} design="secondary">
@@ -223,6 +247,13 @@ export default function Main() {
 
         .success-message a:hover {
           border-bottom: solid 2px #333;
+        }
+
+        .validations {
+          color: red;
+          justify-content: center;
+          padding: 5px;
+          text-align: center;
         }
       `}</style>
     </>
