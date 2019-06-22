@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   const { pathname } = url.parse(req.url)
   const slug = pathname.substr(1).toLowerCase()
 
-  const db = await connectToDatabase(process.env.MONGODB_URI)
+  const db = await connectToDatabase(process.env.MONGO_URL)
   const clipsCollection = await db.collection('clips')
   const clip = await clipsCollection.findOne({ slug })
 
