@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     res.send(`There is no clip for ${slug}`)
   }
 
-  const saveRedirect = async () => {
+  async function saveRedirect() {
     try {
       const redirects = clip.redirects ? [...clip.redirects] : []
       redirects.push({
