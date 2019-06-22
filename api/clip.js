@@ -3,7 +3,7 @@ const { connectToDatabase } = require('./db')
 module.exports = async (req, res) => {
   const slug = req.body.slug.replace(/ /g, '').toLowerCase()
 
-  const db = await connectToDatabase(process.env.MONGO_URL)
+  const db = await connectToDatabase()
   const clipsCollection = await db.collection('clips')
 
   const existingClip = await clipsCollection.findOne({ slug })
