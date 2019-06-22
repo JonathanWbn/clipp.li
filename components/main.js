@@ -35,7 +35,8 @@ export default function Main() {
     return () => clearTimeout(timeoutId)
   }, [status])
 
-  const handleSubmit = () => {
+  const handleSubmit = event => {
+    event.preventDefault()
     const { youtubeLink, start, end, slug } = formValues
 
     const newErrors = validate(formValues)
@@ -116,7 +117,7 @@ export default function Main() {
             <Button type="button" onClick={reset} design="secondary">
               Reset
             </Button>
-            <Button type="button" onClick={handleSubmit} status={status} design="primary">
+            <Button onClick={handleSubmit} status={status} design="primary">
               Generate link
             </Button>
           </div>
