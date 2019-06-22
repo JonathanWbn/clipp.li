@@ -1,8 +1,8 @@
 import axios from 'axios'
-import classnames from 'classnames'
 
 import Button from './button'
 import CopyButton from './copy-button'
+import Input from './input'
 
 const isNumber = val => !Number.isNaN(parseInt(val))
 const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
@@ -14,10 +14,10 @@ const initialFormValues = {
   slug: '',
 }
 const validate = values => ({
-  youtubeLink: !getYoutubeId(values.youtubeLink) && 'Provide a valid YouTube URL.',
-  start: !isNumber(values.start) && 'Provide a start time.',
-  end: !isNumber(values.end) && 'Provide an end time.',
-  slug: !values.slug && 'Provide an URL ending.',
+  youtubeLink: (!values.youtubeLink && 'Required') || (!getYoutubeId(values.youtubeLink) && 'Invalid URL'),
+  start: !isNumber(values.start) && 'Required',
+  end: !isNumber(values.end) && 'Required',
+  slug: !values.slug && 'Required',
 })
 const isEmpty = obj => !Object.values(obj).some(Boolean)
 
@@ -76,51 +76,41 @@ export default function Main() {
         <p>Take clips from YouTube videos and turn them into short, beautiful links.</p>
         <form>
           <div className="row">
-            <input
+            <Input
               value={formValues.youtubeLink}
               name="youtubeLink"
               onChange={e => setFormValues({ ...formValues, youtubeLink: e.target.value })}
               placeholder="YouTube URL"
-              className={classnames('youtube-url', errors.youtubeLink && 'error')}
+              error={errors.youtubeLink}
             />
           </div>
           <div className="row">
-            <input
+            <Input
               value={formValues.start}
               name="start"
               onChange={e => setFormValues({ ...formValues, start: e.target.value })}
-              className={classnames(errors.start && 'error')}
               placeholder="Start (sec)"
+              error={errors.start}
             />
-            <input
+            <Input
               value={formValues.end}
               name="end"
               onChange={e => setFormValues({ ...formValues, end: e.target.value })}
-              className={classnames(errors.end && 'error')}
               placeholder="End (sec)"
+              error={errors.end}
             />
           </div>
           <div className="row">
             <div className="url-preview">
               <span>https://</span>clipp.li/
             </div>
-            <input
+            <Input
               value={formValues.slug}
               name="slug"
-              onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '') })}
+              onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '').toLowerCase() })}
               placeholder="URL ending"
-              className={classnames(errors.slug && 'error')}
+              error={errors.slug}
             />
-          </div>
-          <div className="row validations">
-            {Object.values(errors)
-              .filter(Boolean)
-              .map(str => (
-                <>
-                  {str}
-                  <br />
-                </>
-              ))}
           </div>
           <div className="row">
             <Button type="button" onClick={reset} design="secondary">
@@ -183,26 +173,12 @@ export default function Main() {
           width: calc(50% - 5px);
         }
 
+        .row:first-child > :global(*) {
+          width: 100%;
+        }
+
         .row:not(:first-child) {
           margin-top: 10px;
-        }
-
-        input {
-          border-radius: 10px;
-          border: none;
-          padding: 8px 17px;
-          font-size: 22px;
-          font-weight: 700;
-          color: #333;
-          border: 3px solid white;
-        }
-
-        input.error {
-          border: 3px solid red;
-        }
-
-        input.youtube-url {
-          width: 100%;
         }
 
         .url-preview {
@@ -247,13 +223,6 @@ export default function Main() {
 
         .success-message a:hover {
           border-bottom: solid 2px #333;
-        }
-
-        .validations {
-          color: red;
-          justify-content: center;
-          padding: 5px;
-          text-align: center;
         }
       `}</style>
     </>

@@ -3,12 +3,10 @@ const url = require('url')
 
 module.exports = async (req, res) => {
   const { pathname } = url.parse(req.url)
-  const slug = pathname.substr(1)
+  const slug = pathname.substr(1).toLowerCase()
 
   const db = await connectToDatabase(process.env.MONGODB_URI)
-
   const clipsCollection = await db.collection('clips')
-
   const clip = await clipsCollection.findOne({ slug })
 
   if (clip) {
@@ -22,7 +20,7 @@ module.exports = async (req, res) => {
     res.send(`There is no clip for ${slug}`)
   }
 
-  async function saveRedirect() {
+  const saveRedirect = async () => {
     try {
       const redirects = clip.redirects ? [...clip.redirects] : []
       redirects.push({
