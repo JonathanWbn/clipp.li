@@ -4,22 +4,17 @@ import Button from './button'
 import CopyButton from './copy-button'
 import Input from './input'
 
-const isNumber = val => !Number.isNaN(parseInt(val))
 const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
+const initialFormValues = { youtubeLink: '', start: '', end: '', slug: '' }
+const isNumber = val => !Number.isNaN(parseInt(val))
 const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
-const initialFormValues = {
-  youtubeLink: '',
-  start: '',
-  end: '',
-  slug: '',
-}
 const validate = values => ({
   youtubeLink: (!values.youtubeLink && 'Required') || (!getYoutubeId(values.youtubeLink) && 'Invalid URL'),
   start: !isNumber(values.start) && 'Required',
   end: !isNumber(values.end) && 'Required',
   slug: !values.slug && 'Required',
 })
-const isEmpty = obj => !Object.values(obj).some(Boolean)
+const hasErrors = errors => Object.values(errors).some(Boolean)
 
 export default function Main() {
   const [formValues, setFormValues] = React.useState(initialFormValues)
@@ -28,7 +23,8 @@ export default function Main() {
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
 
   React.useEffect(() => {
-    if (!isEmpty(errors)) setErrors(validate(formValues))
+    // update errors if they already exist
+    if (hasErrors(errors)) setErrors(validate(formValues))
   }, [formValues])
   React.useEffect(() => {
     const timeoutId = ['success', 'failure'].includes(status) && setTimeout(() => setStatus(null), 1000)
@@ -36,33 +32,34 @@ export default function Main() {
   }, [status])
 
   const handleSubmit = event => {
-    event.preventDefault()
     const { youtubeLink, start, end, slug } = formValues
+    event.preventDefault()
 
     const newErrors = validate(formValues)
     setErrors(newErrors)
 
-    if (!isEmpty(newErrors)) {
+    if (hasErrors(newErrors)) {
       const [firstInput] = Object.entries(newErrors).map(
         ([key, value]) => value && document.querySelector(`input[name="${key}"]`)
       )
       if (firstInput) firstInput.focus()
-      return
-    }
+    } else {
+      setStatus('loading')
+      axios
+        .post('/clip', { videoId: getYoutubeId(youtubeLink), start: parseInt(start), end: parseInt(end), slug })
+        .then(() => {
+          setStatus('success')
+          setMostRecentSuccess(slug)
+        })
+        .catch(error => {
+          setErrors({ slug: error.response.data || error.message })
 
-    setStatus('loading')
-    axios
-      .post('/clip', { videoId: getYoutubeId(youtubeLink), start: parseInt(start), end: parseInt(end), slug })
-      .then(() => {
-        setStatus('success')
-        setMostRecentSuccess(slug)
-      })
-      .catch(error => {
-        setErrors({ slug: error.response.data || error.message })
-        const slugInput = document.querySelector('input[name="slug"]')
-        if (slugInput) slugInput.focus()
-        setStatus('failure')
-      })
+          const slugInput = document.querySelector('input[name="slug"]')
+          if (slugInput) slugInput.focus()
+
+          setStatus('failure')
+        })
+    }
   }
 
   const reset = () => {
