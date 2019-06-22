@@ -1,117 +1,117 @@
 import axios from 'axios'
 import classnames from 'classnames'
 
-import { copyToClipboard } from '../utils'
+import Button from './button'
+import CopyButton from './copy-button'
 
 const isNumber = val => !Number.isNaN(parseInt(val))
+const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
+const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
+const initialFormValues = {
+  youtubeLink: '',
+  start: '',
+  end: '',
+  slug: '',
+}
+const validate = values => ({
+  youtubeLink: !getYoutubeId(values.youtubeLink),
+  start: !isNumber(values.start),
+  end: !isNumber(values.end),
+  slug: !values.slug,
+})
 
 export default function Main() {
-  const [youtubeLink, setYoutubeLink] = React.useState('')
-  const [start, setStart] = React.useState('')
-  const [end, setEnd] = React.useState('')
-  const [slug, setSlug] = React.useState('')
+  const [formValues, setFormValues] = React.useState(initialFormValues)
   const [errors, setErrors] = React.useState({})
   const [status, setStatus] = React.useState(null)
-  const [showSuccessMessage, setShowSuccessMessage] = React.useState('')
-  const [copySuccess, setCopySuccess] = React.useState(false)
+  const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
 
-  React.useEffect(() => setErrors({}), [youtubeLink, start, end, slug])
+  React.useEffect(() => setErrors({}), [formValues])
+  React.useEffect(() => {
+    const timeoutId = ['success', 'failure'].includes(status) && setTimeout(() => setStatus(null), 1000)
+    return () => clearTimeout(timeoutId)
+  }, [status])
 
-  const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
   const handleSubmit = () => {
-    const youtubeId = youtubeLink.match(youtubeIdRE) ? youtubeLink.match(youtubeIdRE)[1] : ''
-    const errors = {}
-    if (!youtubeId) errors.youtubeId = true
-    if (!isNumber(start)) errors.start = true
-    if (!isNumber(end)) errors.end = true
-    if (!slug) errors.slug = true
-    if (Object.keys(errors).length > 0) setErrors(errors)
-    else {
-      setErrors({})
-      setStatus('loading')
-      axios
-        .post('/clip', { videoId: youtubeId, start: parseInt(start), end: parseInt(end), slug })
-        .then(() => {
-          setStatus('success')
-          setShowSuccessMessage(slug)
-          setTimeout(() => setStatus(null), 1000)
-        })
-        .catch(() => {
-          setErrors({ slug: true })
-          setStatus(null)
-        })
-    }
+    const { youtubeLink, start, end, slug } = formValues
+
+    const newErrors = validate(formValues)
+    setErrors(newErrors)
+
+    if (Object.values(newErrors).some(Boolean)) return
+
+    setStatus('loading')
+    axios
+      .post('/clip', { videoId: getYoutubeId(youtubeLink), start: parseInt(start), end: parseInt(end), slug })
+      .then(() => {
+        setStatus('success')
+        setMostRecentSuccess(slug)
+      })
+      .catch(() => {
+        // TODO: do actual error handling
+        setErrors({ slug: true })
+        setStatus('failure')
+      })
   }
 
   const reset = () => {
-    setYoutubeLink('')
-    setStart('')
-    setEnd('')
-    setSlug('')
-  }
-
-  const copyLink = () => {
-    if (copyToClipboard(`https://clipp.li/${slug}`)) {
-      setCopySuccess(true)
-      setTimeout(() => setCopySuccess(false), 1000)
-    }
+    setFormValues(initialFormValues)
+    setErrors({})
   }
 
   return (
     <>
       <main>
         <h1>More than just a clip.</h1>
-        <p>Turn clips from YouTube videos and turn them into short, beautiful links.</p>
+        <p>Take clips from YouTube videos and turn them into short, beautiful links.</p>
         <form>
-          <div>
+          <div className="row">
             <input
-              value={youtubeLink}
-              onChange={e => setYoutubeLink(e.target.value)}
+              value={formValues.youtubeLink}
+              onChange={e => setFormValues({ ...formValues, youtubeLink: e.target.value })}
               placeholder="YouTube URL"
-              className={classnames('youtube-url', errors.youtubeId && 'error')}
+              className={classnames('youtube-url', errors.youtubeLink && 'error')}
             />
-            <div className="time-wrapper">
-              <input
-                value={start}
-                onChange={e => setStart(e.target.value)}
-                className={classnames('time', errors.start && 'error')}
-                placeholder="Start (sec)"
-              />
-              <input
-                value={end}
-                onChange={e => setEnd(e.target.value)}
-                className={classnames('time', errors.end && 'error')}
-                placeholder="End (sec)"
-              />
-            </div>
-            <div className="slug-wrapper">
-              <div className="url-preview">
-                <span>https://</span>clipp.li/
-              </div>
-              <input
-                value={slug}
-                onChange={e => setSlug(e.target.value.replace(/ /g, ''))}
-                placeholder="URL ending"
-                className={classnames('slug', errors.slug && 'error')}
-              />
-            </div>
           </div>
-          <div className="buttons">
-            <button type="button" onClick={reset} className="reset-button">
+          <div className="row">
+            <input
+              value={formValues.start}
+              onChange={e => setFormValues({ ...formValues, start: e.target.value })}
+              className={classnames(errors.start && 'error')}
+              placeholder="Start (sec)"
+            />
+            <input
+              value={formValues.end}
+              onChange={e => setFormValues({ ...formValues, end: e.target.value })}
+              className={classnames(errors.end && 'error')}
+              placeholder="End (sec)"
+            />
+          </div>
+          <div className="row">
+            <div className="url-preview">
+              <span>https://</span>clipp.li/
+            </div>
+            <input
+              value={formValues.slug}
+              onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '') })}
+              placeholder="URL ending"
+              className={classnames(errors.slug && 'error')}
+            />
+          </div>
+          <div className="row">
+            <Button type="button" onClick={reset} design="secondary">
               Reset
-            </button>
-            <button type="button" onClick={handleSubmit} className={classnames('generate-button', status)}>
+            </Button>
+            <Button type="button" onClick={handleSubmit} status={status} design="primary">
               Generate link
-            </button>
+            </Button>
           </div>
-          {showSuccessMessage && (
+          {mostRecentSucess && (
             <div className="success-message">
-              <a href={`https://clipp.li/${showSuccessMessage}`} target="_blank" rel="noopener noreferrer">
-                https://clipp.li/{showSuccessMessage}
+              <a href={`https://clipp.li/${mostRecentSucess}`} target="_blank" rel="noopener noreferrer">
+                https://clipp.li/{mostRecentSucess}
               </a>
-              <button type="button" onClick={copyLink} className="copy-button">
-                {copySuccess ? 'Copied.' : 'Copy'}
-              </button>
+              <CopyButton value={`https://clipp.li/${formValues.slug}`} />
             </div>
           )}
         </form>
@@ -132,22 +132,35 @@ export default function Main() {
           padding: 13px;
           background-color: #f5f5f5;
           border-radius: 10px;
-          width: 500px;
-          display: flex;
-          flex-direction: column;
+          width: 480px;
           position: relative;
         }
 
         h1 {
           font-size: 70px;
-          margin-bottom: 15px;
-          width: 500px;
+          line-height: 70px;
+          margin-bottom: 20px;
+          width: 480px;
         }
 
         p {
           font-size: 18px;
           margin-bottom: 40px;
-          width: 500px;
+          width: 480px;
+        }
+
+        .row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .row > :global(*) {
+          width: calc(50% - 5px);
+        }
+
+        .row:not(:first-child) {
+          margin-top: 10px;
         }
 
         input {
@@ -166,91 +179,24 @@ export default function Main() {
 
         input.youtube-url {
           width: 100%;
-          margin-bottom: 10px;
-        }
-
-        input.time {
-          width: calc(50% - 5px);
-        }
-
-        .time-wrapper {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 10px;
         }
 
         .url-preview {
           color: #333;
           font-weight: 700;
           font-size: 22px;
+          text-align: end;
         }
 
         .url-preview span {
           color: lightgrey;
         }
 
-        .slug {
-          width: calc(50% - 5px);
-          margin-left: 15px;
-        }
-
-        .slug-wrapper {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          margin-bottom: 10px;
-        }
-
-        .buttons {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 10px;
-        }
-
-        button {
-          width: calc(50% - 5px);
-          border: none;
-          align-self: center;
-          padding: 10px 17px;
-          border-radius: 10px;
-          font-size: 17px;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        button.loading {
-          cursor: default;
-          pointer-events: none;
-          background-color: #a6dbff;
-        }
-
-        button.success {
-          background-color: #00c969;
-        }
-
-        .generate-button {
-          background-color: #09f;
-          color: white;
-        }
-
-        .reset-button {
-          background-color: #a4a4a4;
-          color: white;
-        }
-
-        .copy-button {
-          background-color: #a4a4a4;
-          color: white;
-          margin-left: 10px;
-          min-width: 120px;
-          width: unset;
-        }
-
         .success-message {
           padding: 13px;
           background-color: #f5f5f5;
           border-radius: 10px;
-          width: 500px;
+          width: 100%;
           margin-top: 30px;
           position: absolute;
           left: 0;
