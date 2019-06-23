@@ -20,6 +20,7 @@ export default function Input({ error, ...props }) {
           border-style: solid;
           border-color: white;
           width: 100%;
+          -webkit-appearance: none;
         }
 
         input.error {
