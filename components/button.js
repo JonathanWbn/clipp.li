@@ -14,13 +14,11 @@ export default function Button({ status, design, size, ...props }) {
         }
 
         button.medium {
-          min-width: 200px;
           padding: 10px 17px;
           font-size: 17px;
         }
 
         button.small {
-          min-width: 120px;
           padding: 8px 15px;
           font-size: 15px;
         }
@@ -50,6 +48,13 @@ export default function Button({ status, design, size, ...props }) {
 
         button.primary.failure {
           background-color: red;
+        }
+
+        @media (max-width: 700px) {
+          button.medium {
+            padding: 8px 14px;
+            font-size: 14px;
+          }
         }
       `}</style>
     </>

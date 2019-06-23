@@ -16,12 +16,14 @@ export default function Input({ error, ...props }) {
           font-size: 22px;
           font-weight: 700;
           color: #333;
-          border: 3px solid white;
+          border-width: 3px;
+          border-style: solid;
+          border-color: white;
           width: 100%;
         }
 
         input.error {
-          border: 3px solid red;
+          border-color: red;
         }
 
         .input-wrapper {
@@ -34,6 +36,20 @@ export default function Input({ error, ...props }) {
           bottom: 3px;
           right: 6px;
           font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+          input {
+            padding: 5px 12px;
+            font-size: 17px;
+            border-width: 2px;
+          }
+
+          .input-wrapper > .validation-error {
+            bottom: 2px;
+            right: 6px;
+            font-size: 9px;
+          }
         }
       `}</style>
     </>

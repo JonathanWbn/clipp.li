@@ -35,6 +35,12 @@ export default function Footer() {
         footer a:hover {
           border-bottom: solid 2px #333;
         }
+
+        @media (max-width: 700px) {
+          footer {
+            height: 60px;
+          }
+        }
       `}</style>
     </>
   )

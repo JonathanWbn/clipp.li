@@ -144,7 +144,8 @@ export default function Main() {
           padding: 13px;
           background-color: #f5f5f5;
           border-radius: 10px;
-          width: 480px;
+          width: 100%;
+          max-width: 480px;
           position: relative;
         }
 
@@ -152,13 +153,15 @@ export default function Main() {
           font-size: 70px;
           line-height: 70px;
           margin-bottom: 20px;
-          width: 480px;
+          width: 100%;
+          max-width: 480px;
         }
 
         p {
           font-size: 18px;
           margin-bottom: 40px;
-          width: 480px;
+          width: 100%;
+          max-width: 480px;
         }
 
         .row {
@@ -195,16 +198,12 @@ export default function Main() {
           background-color: #f5f5f5;
           border-radius: 10px;
           width: 100%;
-          margin-top: 30px;
           position: absolute;
           left: 0;
           bottom: -90px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-weight: 700;
-          font-size: 22px;
-          color: #333;
           border: 3px solid #00c969;
         }
 
@@ -217,10 +216,47 @@ export default function Main() {
           text-decoration: none;
           transition: all 0.2s ease 0s;
           border-bottom: solid 2px transparent;
+          border-top: 2px solid transparent;
+          font-weight: 700;
+          font-size: 22px;
         }
 
         .success-message a:hover {
           border-bottom: solid 2px #333;
+        }
+
+        @media (max-width: 700px) {
+          main {
+            height: calc(100vh - 120px);
+          }
+
+          h1 {
+            font-size: 30px;
+            line-height: 40px;
+            margin-bottom: 10px;
+          }
+
+          p {
+            margin-bottom: 20px;
+          }
+
+          main {
+            padding: 10px;
+          }
+
+          .url-preview {
+            font-size: 17px;
+          }
+
+          .success-message {
+            padding: 6px;
+            bottom: -60px;
+            border: 2px solid #00c969;
+          }
+
+          .success-message a {
+            font-size: 18px;
+          }
         }
       `}</style>
     </>
