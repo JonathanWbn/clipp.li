@@ -24,6 +24,17 @@ class MyApp extends App {
           <meta name="description" content="Turn YouTube clips into short and beautiful URL's" />
           <meta name="keywords" content="clippli youtube clip crop bitly" />
           <meta name="author" content="Jonathan Wieben" />
+          <meta name="google-site-verification" content="PPgl0veNAre2jyEOs5sbiMxJJjBr6Fq7n9FmLxPdGxE" />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+                ga('create', 'UA-142572804-1', 'auto');
+                ga('send', 'pageview');
+              `,
+            }}
+          />
+          <script async src="https://www.google-analytics.com/analytics.js" />
           <title>clippli | More than just a clip.</title>
         </Head>
         <Component {...pageProps} />
