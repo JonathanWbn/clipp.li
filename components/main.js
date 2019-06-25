@@ -1,11 +1,12 @@
 import axios from 'axios'
+import { Box, Grommet, RangeSelector, Stack, Text, grommet } from 'grommet'
 
 import Button from './button'
 import CopyButton from './copy-button'
 import Input from './input'
 
 const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
-const initialFormValues = { youtubeLink: '', start: '', end: '', slug: '' }
+const initialFormValues = { youtubeLink: '', start: 0, end: 9, slug: '' }
 const isNumber = val => !Number.isNaN(parseInt(val))
 const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
 const validate = values => ({
@@ -16,11 +17,32 @@ const validate = values => ({
 })
 const hasErrors = errors => Object.values(errors).some(Boolean)
 
+function useYoutubeVideoDuration(youtubeId) {
+  const [duration, setDuration] = React.useState(null)
+
+  React.useEffect(async () => {
+    if (youtubeId) {
+      const { data } = await axios.get(
+        `https://www.googleapis.com/youtube/v3/videos?id=${youtubeId}&part=contentDetails&key={YOUR_API_KEY}`
+      )
+      console.log('data', data)
+      const duration = 0
+      setDuration(duration)
+    } else {
+      setDuration(null)
+    }
+  }, [youtubeId])
+
+  return duration
+}
+
 export default function Main() {
   const [formValues, setFormValues] = React.useState(initialFormValues)
   const [errors, setErrors] = React.useState({})
   const [status, setStatus] = React.useState(null)
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
+  // const videoDuration = useYoutubeVideoDuration(getYoutubeId(formValues.youtubeLink))
+  // console.log('videoDuration', videoDuration)
 
   React.useEffect(() => {
     // update errors if they already exist
@@ -83,20 +105,25 @@ export default function Main() {
             />
           </div>
           <div className="row">
-            <Input
-              value={formValues.start}
-              name="start"
-              onChange={e => setFormValues({ ...formValues, start: e.target.value })}
-              placeholder="Start (sec)"
-              error={errors.start}
-            />
-            <Input
-              value={formValues.end}
-              name="end"
-              onChange={e => setFormValues({ ...formValues, end: e.target.value })}
-              placeholder="End (sec)"
-              error={errors.end}
-            />
+            <Grommet theme={grommet}>
+              <Stack>
+                <Box direction="row" justify="between">
+                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(value => (
+                    <Box key={value} pad="small" border={false}>
+                      <Text style={{ fontFamily: 'monospace' }}>{value}</Text>
+                    </Box>
+                  ))}
+                </Box>
+                <RangeSelector
+                  min={0}
+                  max={9}
+                  size="full"
+                  round="small"
+                  values={[formValues.start, formValues.end]}
+                  onChange={([start, end]) => setFormValues({ ...formValues, start, end })}
+                />
+              </Stack>
+            </Grommet>
           </div>
           <div className="row">
             <div className="url-preview">
