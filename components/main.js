@@ -1,12 +1,13 @@
 import axios from 'axios'
-import { Box, Grommet, RangeSelector, Stack, Text, grommet } from 'grommet'
+import { Box, Grommet, RangeSelector, Stack } from 'grommet'
+import moment from 'moment'
 
 import Button from './button'
 import CopyButton from './copy-button'
 import Input from './input'
 
 const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
-const initialFormValues = { youtubeLink: '', start: 0, end: 9, slug: '' }
+const initialFormValues = { youtubeLink: '', start: 0, end: 0, slug: '' }
 const isNumber = val => !Number.isNaN(parseInt(val))
 const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
 const validate = values => ({
@@ -17,17 +18,27 @@ const validate = values => ({
 })
 const hasErrors = errors => Object.values(errors).some(Boolean)
 
+const digitsToStep = {
+  1: 1,
+  2: 10,
+  3: 100,
+  4: 1000,
+}
+
 function useYoutubeVideoDuration(youtubeId) {
   const [duration, setDuration] = React.useState(null)
 
-  React.useEffect(async () => {
+  React.useEffect(() => {
     if (youtubeId) {
-      const { data } = await axios.get(
-        `https://www.googleapis.com/youtube/v3/videos?id=${youtubeId}&part=contentDetails&key={YOUR_API_KEY}`
-      )
-      console.log('data', data)
-      const duration = 0
-      setDuration(duration)
+      axios
+        .get(
+          `https://www.googleapis.com/youtube/v3/videos?id=${youtubeId}&part=contentDetails&key=AIzaSyAEJUDG4jawVOGAL6-im8wC2ThEWmBpskU`
+        )
+        .then(({ data }) => {
+          const [youtubeVideo] = data.items
+          const duration = moment.duration(youtubeVideo.contentDetails.duration).asSeconds()
+          setDuration(duration)
+        })
     } else {
       setDuration(null)
     }
@@ -36,13 +47,22 @@ function useYoutubeVideoDuration(youtubeId) {
   return duration
 }
 
+const formatSeconds = secs => {
+  const momentDuration = moment.duration(secs, 'seconds')
+  const hours = momentDuration.hours()
+  const minutes = momentDuration.minutes()
+  const seconds = momentDuration.seconds()
+  const isZero = hours + minutes + hours === 0
+
+  return `${hours ? `${hours}:` : ''}${minutes || isZero ? `${minutes}:` : ''}${String(seconds).padStart(2, 0)}`
+}
+
 export default function Main() {
   const [formValues, setFormValues] = React.useState(initialFormValues)
   const [errors, setErrors] = React.useState({})
   const [status, setStatus] = React.useState(null)
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
-  // const videoDuration = useYoutubeVideoDuration(getYoutubeId(formValues.youtubeLink))
-  // console.log('videoDuration', videoDuration)
+  const videoDuration = useYoutubeVideoDuration(getYoutubeId(formValues.youtubeLink))
 
   React.useEffect(() => {
     // update errors if they already exist
@@ -52,6 +72,9 @@ export default function Main() {
     const timeoutId = ['success', 'failure'].includes(status) && setTimeout(() => setStatus(null), 1000)
     return () => clearTimeout(timeoutId)
   }, [status])
+  React.useEffect(() => {
+    if (videoDuration) setFormValues({ ...formValues, start: 0, end: videoDuration })
+  }, [videoDuration])
 
   const handleSubmit = event => {
     const { youtubeLink, start, end, slug } = formValues
@@ -89,13 +112,15 @@ export default function Main() {
     setErrors({})
   }
 
+  const step = videoDuration && digitsToStep[videoDuration.toString().length]
+
   return (
     <>
       <main>
         <h1>More than just a clip.</h1>
         <p>Take clips from YouTube videos and turn them into short, beautiful links.</p>
         <form>
-          <div className="row">
+          <div className="row full">
             <Input
               value={formValues.youtubeLink}
               name="youtubeLink"
@@ -104,26 +129,34 @@ export default function Main() {
               error={errors.youtubeLink}
             />
           </div>
-          <div className="row">
-            <Grommet theme={grommet}>
+          <div className="row full">
+            <Grommet theme={{}}>
               <Stack>
-                <Box direction="row" justify="between">
-                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(value => (
-                    <Box key={value} pad="small" border={false}>
-                      <Text style={{ fontFamily: 'monospace' }}>{value}</Text>
-                    </Box>
-                  ))}
+                <Box direction="row" justify="between" round="10px" background="white" height="48px">
+                  {videoDuration &&
+                    [...new Array(Math.ceil(videoDuration / step))].map((_v, index) => (
+                      <Box key={index} pad="small">
+                        <span style={{ fontFamily: 'monospace', fontSize: 14 }}>{formatSeconds(index * step)}</span>
+                      </Box>
+                    ))}
                 </Box>
-                <RangeSelector
-                  min={0}
-                  max={9}
-                  size="full"
-                  round="small"
-                  values={[formValues.start, formValues.end]}
-                  onChange={([start, end]) => setFormValues({ ...formValues, start, end })}
-                />
+                {videoDuration && (
+                  <RangeSelector
+                    color="rgba(0,153,255,1)"
+                    min={0}
+                    max={videoDuration || 0}
+                    round="10px"
+                    size="full"
+                    values={[formValues.start, formValues.end]}
+                    onChange={([start, end]) => setFormValues({ ...formValues, start, end })}
+                  />
+                )}
               </Stack>
             </Grommet>
+          </div>
+          <div className="row">
+            <Input value={formatSeconds(formValues.start)} readOnly />
+            <Input value={formatSeconds(formValues.end)} readOnly />
           </div>
           <div className="row">
             <div className="url-preview">
@@ -201,7 +234,7 @@ export default function Main() {
           width: calc(50% - 5px);
         }
 
-        .row:first-child > :global(*) {
+        .row.full > :global(*) {
           width: 100%;
         }
 
@@ -254,7 +287,7 @@ export default function Main() {
 
         @media (max-width: 700px) {
           main {
-            height: calc(100vh - 120px);
+            height: calc(100vh - 90px);
           }
 
           h1 {
