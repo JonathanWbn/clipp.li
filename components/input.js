@@ -23,11 +23,6 @@ export default function Input({ error, ...props }) {
           -webkit-appearance: none;
         }
 
-        input:disabled {
-          background-color: rgba(183, 183, 183, 0.15);
-          border-color: rgba(183, 183, 183, 0.15);
-        }
-
         input.error {
           border-color: red;
         }

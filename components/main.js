@@ -1,4 +1,5 @@
 import axios from 'axios'
+import classnames from 'classnames'
 import { Box, Grommet, RangeSelector, Stack } from 'grommet'
 import moment from 'moment'
 
@@ -8,12 +9,9 @@ import Input from './input'
 
 const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
 const initialFormValues = { youtubeLink: '', start: 0, end: 0, slug: '' }
-const isNumber = val => !Number.isNaN(parseInt(val))
 const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
-const validate = values => ({
-  youtubeLink: (!values.youtubeLink && 'Required') || (!getYoutubeId(values.youtubeLink) && 'Invalid URL'),
-  start: !isNumber(values.start) && 'Required',
-  end: !isNumber(values.end) && 'Required',
+const validate = (values, videoDuration) => ({
+  youtubeLink: (!values.youtubeLink && 'Required') || (!videoDuration && 'Invalid URL'),
   slug: !values.slug && 'Required',
 })
 const hasErrors = errors => Object.values(errors).some(Boolean)
@@ -36,8 +34,12 @@ function useYoutubeVideoDuration(youtubeId) {
         )
         .then(({ data }) => {
           const [youtubeVideo] = data.items
-          const duration = moment.duration(youtubeVideo.contentDetails.duration).asSeconds()
-          setDuration(duration)
+          if (youtubeVideo) {
+            const duration = moment.duration(youtubeVideo.contentDetails.duration).asSeconds()
+            setDuration(duration)
+          } else {
+            setDuration(null)
+          }
         })
     } else {
       setDuration(null)
@@ -47,14 +49,19 @@ function useYoutubeVideoDuration(youtubeId) {
   return duration
 }
 
+const padNumber = num => String(num).padStart(2, 0)
+
 const formatSeconds = secs => {
   const momentDuration = moment.duration(secs, 'seconds')
   const hours = momentDuration.hours()
   const minutes = momentDuration.minutes()
   const seconds = momentDuration.seconds()
   const isZero = hours + minutes + hours === 0
+  const showMinutes = minutes || isZero
 
-  return `${hours ? `${hours}:` : ''}${minutes || isZero ? `${minutes}:` : ''}${String(seconds).padStart(2, 0)}`
+  return `${hours ? `${hours}:` : ''}${showMinutes ? `${hours ? padNumber(minutes) : minutes}:` : ''}${padNumber(
+    seconds
+  )}`
 }
 
 export default function Main() {
@@ -66,8 +73,10 @@ export default function Main() {
 
   React.useEffect(() => {
     // update errors if they already exist
-    if (hasErrors(errors)) setErrors(validate(formValues))
-  }, [formValues])
+    if (hasErrors(errors)) setErrors(validate(formValues, videoDuration))
+    if (formValues.start < 0) setFormValues({ ...formValues, start: 0 })
+    if (formValues.end > videoDuration) setFormValues({ ...formValues, end: videoDuration })
+  }, [formValues, videoDuration])
   React.useEffect(() => {
     const timeoutId = ['success', 'failure'].includes(status) && setTimeout(() => setStatus(null), 1000)
     return () => clearTimeout(timeoutId)
@@ -80,7 +89,7 @@ export default function Main() {
     const { youtubeLink, start, end, slug } = formValues
     event.preventDefault()
 
-    const newErrors = validate(formValues)
+    const newErrors = validate(formValues, videoDuration)
     setErrors(newErrors)
 
     if (hasErrors(newErrors)) {
@@ -138,7 +147,6 @@ export default function Main() {
                   round="10px"
                   background={videoDuration ? 'white' : 'rgba(183, 183, 183, 0.15)'}
                   height="48px"
-                  border={!videoDuration && { color: 'rgba(183, 183, 183, 0.15)', size: '3px' }}
                 >
                   {videoDuration &&
                     [...new Array(Math.ceil(videoDuration / step))].map((_v, index) => (
@@ -162,8 +170,44 @@ export default function Main() {
             </Grommet>
           </div>
           <div className="row">
-            <Input value={videoDuration ? formatSeconds(formValues.start) : ''} readOnly disabled={!videoDuration} />
-            <Input value={videoDuration ? formatSeconds(formValues.end) : ''} readOnly disabled={!videoDuration} />
+            <div className={classnames('time', !videoDuration && 'disabled')}>
+              <div className="value">{videoDuration ? formatSeconds(formValues.start) : ''}</div>
+              <div className="arrows">
+                <button
+                  type="button"
+                  className="arrow"
+                  onClick={() => setFormValues({ ...formValues, start: formValues.start + 1 })}
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormValues({ ...formValues, start: formValues.start - 1 })}
+                  className="arrow"
+                >
+                  -
+                </button>
+              </div>
+            </div>
+            <div className={classnames('time', !videoDuration && 'disabled')}>
+              <div className="value">{videoDuration ? formatSeconds(formValues.end) : ''}</div>
+              <div className="arrows">
+                <button
+                  className="arrow"
+                  type="button"
+                  onClick={() => setFormValues({ ...formValues, end: formValues.end + 1 })}
+                >
+                  +
+                </button>
+                <button
+                  className="arrow"
+                  type="button"
+                  onClick={() => setFormValues({ ...formValues, end: formValues.end - 1 })}
+                >
+                  -
+                </button>
+              </div>
+            </div>
           </div>
           <div className="row">
             <div className="url-preview">
@@ -290,6 +334,57 @@ export default function Main() {
 
         .success-message a:hover {
           border-bottom: solid 2px #333;
+        }
+
+        .time {
+          background-color: white;
+          border-radius: 10px;
+          display: flex;
+          height: 48px;
+        }
+
+        .time .value {
+          display: flex;
+          align-items: center;
+          padding: 8px 17px;
+          color: #333;
+          font-weight: bold;
+          font-size: 22px;
+        }
+
+        .time.disabled {
+          background-color: rgba(183, 183, 183, 0.15);
+        }
+
+        .time .value {
+          flex-grow: 1;
+        }
+
+        .time .arrows {
+          display: flex;
+          flex-direction: column;
+          border-left: 2px solid rgba(183, 183, 183, 0.15);
+          width: 25%;
+        }
+
+        .time .arrow {
+          flex-grow: 1;
+          background-color: unset;
+          border: none;
+          color: #a4a4a4;
+          font-size: 20px;
+          padding: 0;
+          line-height: 10px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        .disabled .arrow {
+          cursor: not-allowed;
+        }
+
+        .time .arrow:not(:first-child) {
+          border-top: 2px solid rgba(183, 183, 183, 0.15);
         }
 
         @media (max-width: 700px) {
