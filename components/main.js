@@ -1,20 +1,31 @@
 import axios from 'axios'
+import classnames from 'classnames'
+import { Box, Grommet, RangeSelector, Stack } from 'grommet'
+import { number } from 'prop-types'
 
+import { formatSeconds, getYoutubeId } from '../helpers'
+import { useMobile, useYoutubeVideoDuration } from '../hooks'
 import Button from './button'
 import CopyButton from './copy-button'
 import Input from './input'
 
-const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
-const initialFormValues = { youtubeLink: '', start: '', end: '', slug: '' }
-const isNumber = val => !Number.isNaN(parseInt(val))
-const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
-const validate = values => ({
-  youtubeLink: (!values.youtubeLink && 'Required') || (!getYoutubeId(values.youtubeLink) && 'Invalid URL'),
-  start: !isNumber(values.start) && 'Required',
-  end: !isNumber(values.end) && 'Required',
+const initialFormValues = { youtubeLink: '', start: 0, end: 0, slug: '' }
+const validate = (values, hasValidUrl) => ({
+  youtubeLink: (!values.youtubeLink && 'Required') || (!hasValidUrl && 'Invalid URL'),
   slug: !values.slug && 'Required',
 })
 const hasErrors = errors => Object.values(errors).some(Boolean)
+
+function Time({ seconds }) {
+  return (
+    <Box pad="small" alignSelf="center">
+      <span style={{ fontFamily: 'monospace', fontSize: 14 }}>{formatSeconds(Math.round(seconds))}</span>
+    </Box>
+  )
+}
+Time.propTypes = {
+  seconds: number,
+}
 
 export default function Main() {
   const [formValues, setFormValues] = React.useState(initialFormValues)
@@ -22,20 +33,31 @@ export default function Main() {
   const [status, setStatus] = React.useState(null)
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
 
+  const videoDuration = useYoutubeVideoDuration(getYoutubeId(formValues.youtubeLink))
+  const isMobile = useMobile()
+
+  const hasValidUrl = typeof videoDuration === 'number'
+
   React.useEffect(() => {
     // update errors if they already exist
-    if (hasErrors(errors)) setErrors(validate(formValues))
-  }, [formValues])
+    if (hasErrors(errors)) setErrors(validate(formValues, hasValidUrl))
+    if (formValues.start < 0) setFormValues({ ...formValues, start: 0 })
+    if (formValues.end > videoDuration) setFormValues({ ...formValues, end: videoDuration })
+  }, [formValues, videoDuration])
+
   React.useEffect(() => {
     const timeoutId = ['success', 'failure'].includes(status) && setTimeout(() => setStatus(null), 1000)
     return () => clearTimeout(timeoutId)
   }, [status])
 
-  const handleSubmit = event => {
-    const { youtubeLink, start, end, slug } = formValues
-    event.preventDefault()
+  React.useEffect(() => {
+    if (videoDuration) setFormValues({ ...formValues, start: 0, end: videoDuration })
+  }, [videoDuration])
 
-    const newErrors = validate(formValues)
+  const handleSubmit = () => {
+    const { youtubeLink, start, end, slug } = formValues
+
+    const newErrors = validate(formValues, hasValidUrl)
     setErrors(newErrors)
 
     if (hasErrors(newErrors)) {
@@ -73,30 +95,77 @@ export default function Main() {
         <h1>More than just a clip.</h1>
         <p>Take clips from YouTube videos and turn them into short, beautiful links.</p>
         <form>
-          <div className="row">
+          <div className="row full">
             <Input
               value={formValues.youtubeLink}
               name="youtubeLink"
               onChange={e => setFormValues({ ...formValues, youtubeLink: e.target.value })}
               placeholder="YouTube URL"
-              error={errors.youtubeLink}
+              error={errors.youtubeLink || ''}
             />
           </div>
+          <div className="row full">
+            <Grommet theme={{}}>
+              {isMobile !== undefined && (
+                <Stack>
+                  <Box
+                    direction="row"
+                    justify="between"
+                    round="10px"
+                    background={hasValidUrl ? 'white' : 'rgba(183, 183, 183, 0.15)'}
+                    height={isMobile ? '40px' : '48px'}
+                  >
+                    {hasValidUrl && (
+                      <>
+                        <Time seconds={0} />
+                        {isMobile ? (
+                          <Time seconds={videoDuration / 2} />
+                        ) : (
+                          <>
+                            <Time seconds={videoDuration * 0.2} />
+                            <Time seconds={videoDuration * 0.4} />
+                            <Time seconds={videoDuration * 0.6} />
+                            <Time seconds={videoDuration * 0.8} />
+                          </>
+                        )}
+                        <Time seconds={videoDuration} />
+                      </>
+                    )}
+                  </Box>
+                  {hasValidUrl && (
+                    <RangeSelector
+                      color="rgba(0,153,255,1)"
+                      min={0}
+                      max={videoDuration}
+                      round="10px"
+                      size="full"
+                      values={[formValues.start, formValues.end]}
+                      onChange={([start, end]) => setFormValues({ ...formValues, start, end })}
+                    />
+                  )}
+                </Stack>
+              )}
+            </Grommet>
+          </div>
           <div className="row">
-            <Input
-              value={formValues.start}
-              name="start"
-              onChange={e => setFormValues({ ...formValues, start: e.target.value })}
-              placeholder="Start (sec)"
-              error={errors.start}
-            />
-            <Input
-              value={formValues.end}
-              name="end"
-              onChange={e => setFormValues({ ...formValues, end: e.target.value })}
-              placeholder="End (sec)"
-              error={errors.end}
-            />
+            <div className={classnames('time', !hasValidUrl && 'disabled')}>
+              <div className="value">{hasValidUrl ? formatSeconds(formValues.start) : ''}</div>
+              <button type="button" onClick={() => setFormValues({ ...formValues, start: formValues.start - 1 })}>
+                -
+              </button>
+              <button type="button" onClick={() => setFormValues({ ...formValues, start: formValues.start + 1 })}>
+                +
+              </button>
+            </div>
+            <div className={classnames('time', !hasValidUrl && 'disabled')}>
+              <div className="value">{hasValidUrl ? formatSeconds(formValues.end) : ''}</div>
+              <button type="button" onClick={() => setFormValues({ ...formValues, end: formValues.end - 1 })}>
+                -
+              </button>
+              <button type="button" onClick={() => setFormValues({ ...formValues, end: formValues.end + 1 })}>
+                +
+              </button>
+            </div>
           </div>
           <div className="row">
             <div className="url-preview">
@@ -107,14 +176,14 @@ export default function Main() {
               name="slug"
               onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '').toLowerCase() })}
               placeholder="URL ending"
-              error={errors.slug}
+              error={errors.slug || ''}
             />
           </div>
           <div className="row">
             <Button type="button" onClick={reset} design="secondary">
               Reset
             </Button>
-            <Button onClick={handleSubmit} status={status} design="primary">
+            <Button type="button" onClick={handleSubmit} status={status} design="primary">
               Generate link
             </Button>
           </div>
@@ -174,7 +243,7 @@ export default function Main() {
           width: calc(50% - 5px);
         }
 
-        .row:first-child > :global(*) {
+        .row.full > :global(*) {
           width: 100%;
         }
 
@@ -225,6 +294,43 @@ export default function Main() {
           border-bottom: solid 2px #333;
         }
 
+        .time {
+          background-color: white;
+          border-radius: 10px;
+          display: flex;
+          height: 48px;
+        }
+
+        .time .value {
+          flex-grow: 1;
+          display: flex;
+          align-items: center;
+          padding: 8px 17px;
+          color: #333;
+          font-weight: bold;
+          font-size: 22px;
+        }
+
+        .time.disabled {
+          background-color: rgba(183, 183, 183, 0.15);
+        }
+
+        .time > button {
+          background-color: unset;
+          border: none;
+          font-size: 20px;
+          font-weight: bold;
+          color: #333;
+          cursor: pointer;
+          width: 45px;
+          border-left: 2px solid rgba(183, 183, 183, 0.15);
+        }
+
+        .time.disabled > button {
+          cursor: not-allowed;
+          color: #a4a4a4;
+        }
+
         @media (max-width: 700px) {
           main {
             height: calc(100vh - 120px);
@@ -242,6 +348,7 @@ export default function Main() {
 
           main {
             padding: 10px;
+            padding-bottom: 30px;
           }
 
           .url-preview {
@@ -256,6 +363,20 @@ export default function Main() {
 
           .success-message a {
             font-size: 18px;
+          }
+
+          .time {
+            height: 34px;
+          }
+
+          .time > button {
+            width: 30px;
+            font-size: 16px;
+          }
+
+          .time .value {
+            font-size: 15px;
+            padding: 3px 7px;
           }
         }
       `}</style>
