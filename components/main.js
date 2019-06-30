@@ -23,6 +23,33 @@ const digitsToStep = {
   4: 1000,
 }
 
+function getSize() {
+  if (typeof window === 'undefined') return {}
+  return {
+    innerHeight: window.innerHeight,
+    innerWidth: window.innerWidth,
+    outerHeight: window.outerHeight,
+    outerWidth: window.outerWidth,
+  }
+}
+
+function useWindowSize() {
+  let [windowSize, setWindowSize] = React.useState(getSize())
+
+  function handleResize() {
+    setWindowSize(getSize())
+  }
+
+  React.useEffect(() => {
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  return windowSize
+}
+
 function useYoutubeVideoDuration(youtubeId) {
   const [duration, setDuration] = React.useState(null)
 
@@ -70,6 +97,7 @@ export default function Main() {
   const [status, setStatus] = React.useState(null)
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
   const videoDuration = useYoutubeVideoDuration(getYoutubeId(formValues.youtubeLink))
+  const { innerWidth } = useWindowSize()
 
   React.useEffect(() => {
     // update errors if they already exist
@@ -120,7 +148,7 @@ export default function Main() {
     setFormValues(initialFormValues)
     setErrors({})
   }
-
+  const isMobile = innerWidth < 600
   const step = videoDuration && digitsToStep[videoDuration.toString().length]
 
   return (
@@ -140,73 +168,89 @@ export default function Main() {
           </div>
           <div className="row full">
             <Grommet theme={{}}>
-              <Stack>
-                <Box
-                  direction="row"
-                  justify="between"
-                  round="10px"
-                  background={videoDuration ? 'white' : 'rgba(183, 183, 183, 0.15)'}
-                  height="48px"
-                >
-                  {videoDuration &&
-                    [...new Array(Math.ceil(videoDuration / step))].map((_v, index) => (
-                      <Box key={index} pad="small">
-                        <span style={{ fontFamily: 'monospace', fontSize: 14 }}>{formatSeconds(index * step)}</span>
-                      </Box>
-                    ))}
-                </Box>
-                {videoDuration && (
-                  <RangeSelector
-                    color="rgba(0,153,255,1)"
-                    min={0}
-                    max={videoDuration || 0}
+              {innerWidth && (
+                <Stack>
+                  <Box
+                    direction="row"
+                    justify="between"
                     round="10px"
-                    size="full"
-                    values={[formValues.start, formValues.end]}
-                    onChange={([start, end]) => setFormValues({ ...formValues, start, end })}
-                  />
-                )}
-              </Stack>
+                    background={videoDuration ? 'white' : 'rgba(183, 183, 183, 0.15)'}
+                    height={isMobile ? '34px' : '48px'}
+                  >
+                    {videoDuration &&
+                      (isMobile ? (
+                        <>
+                          <Box pad="small" alignSelf="center">
+                            <span style={{ fontFamily: 'monospace', fontSize: 14 }}>{formatSeconds(0)}</span>
+                          </Box>
+                          <Box pad="small" alignSelf="center">
+                            <span style={{ fontFamily: 'monospace', fontSize: 14 }}>
+                              {formatSeconds(Math.round(videoDuration / 2))}
+                            </span>
+                          </Box>
+                          <Box pad="small" alignSelf="center">
+                            <span style={{ fontFamily: 'monospace', fontSize: 14 }}>
+                              {formatSeconds(videoDuration)}
+                            </span>
+                          </Box>
+                        </>
+                      ) : (
+                        [...new Array(Math.ceil(videoDuration / step))].map((_v, index) => (
+                          <Box key={index} pad="small" alignSelf="center">
+                            <span style={{ fontFamily: 'monospace', fontSize: 14 }}>{formatSeconds(index * step)}</span>
+                          </Box>
+                        ))
+                      ))}
+                  </Box>
+                  {videoDuration && (
+                    <RangeSelector
+                      color="rgba(0,153,255,1)"
+                      min={0}
+                      max={videoDuration || 0}
+                      round="10px"
+                      size="full"
+                      values={[formValues.start, formValues.end]}
+                      onChange={([start, end]) => setFormValues({ ...formValues, start, end })}
+                    />
+                  )}
+                </Stack>
+              )}
             </Grommet>
           </div>
           <div className="row">
             <div className={classnames('time', !videoDuration && 'disabled')}>
               <div className="value">{videoDuration ? formatSeconds(formValues.start) : ''}</div>
-              <div className="arrows">
-                <button
-                  type="button"
-                  className="arrow"
-                  onClick={() => setFormValues({ ...formValues, start: formValues.start + 1 })}
-                >
-                  +
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormValues({ ...formValues, start: formValues.start - 1 })}
-                  className="arrow"
-                >
-                  -
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setFormValues({ ...formValues, start: formValues.start - 1 })}
+                className="arrow"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                className="arrow"
+                onClick={() => setFormValues({ ...formValues, start: formValues.start + 1 })}
+              >
+                +
+              </button>
             </div>
             <div className={classnames('time', !videoDuration && 'disabled')}>
               <div className="value">{videoDuration ? formatSeconds(formValues.end) : ''}</div>
-              <div className="arrows">
-                <button
-                  className="arrow"
-                  type="button"
-                  onClick={() => setFormValues({ ...formValues, end: formValues.end + 1 })}
-                >
-                  +
-                </button>
-                <button
-                  className="arrow"
-                  type="button"
-                  onClick={() => setFormValues({ ...formValues, end: formValues.end - 1 })}
-                >
-                  -
-                </button>
-              </div>
+              <button
+                className="arrow"
+                type="button"
+                onClick={() => setFormValues({ ...formValues, end: formValues.end - 1 })}
+              >
+                -
+              </button>
+              <button
+                className="arrow"
+                type="button"
+                onClick={() => setFormValues({ ...formValues, end: formValues.end + 1 })}
+              >
+                +
+              </button>
             </div>
           </div>
           <div className="row">
@@ -344,6 +388,7 @@ export default function Main() {
         }
 
         .time .value {
+          flex-grow: 1;
           display: flex;
           align-items: center;
           padding: 8px 17px;
@@ -356,35 +401,20 @@ export default function Main() {
           background-color: rgba(183, 183, 183, 0.15);
         }
 
-        .time .value {
-          flex-grow: 1;
-        }
-
-        .time .arrows {
-          display: flex;
-          flex-direction: column;
-          border-left: 2px solid rgba(183, 183, 183, 0.15);
-          width: 25%;
-        }
-
         .time .arrow {
-          flex-grow: 1;
           background-color: unset;
           border: none;
-          color: #a4a4a4;
           font-size: 20px;
-          padding: 0;
-          line-height: 10px;
           font-weight: bold;
+          color: #333;
           cursor: pointer;
+          width: 45px;
+          border-left: 2px solid rgba(183, 183, 183, 0.15);
         }
 
         .disabled .arrow {
           cursor: not-allowed;
-        }
-
-        .time .arrow:not(:first-child) {
-          border-top: 2px solid rgba(183, 183, 183, 0.15);
+          color: #a4a4a4;
         }
 
         @media (max-width: 700px) {
@@ -418,6 +448,20 @@ export default function Main() {
 
           .success-message a {
             font-size: 18px;
+          }
+
+          .time {
+            height: 34px;
+          }
+
+          .time .arrow {
+            width: 30px;
+            font-size: 16px;
+          }
+
+          .time .value {
+            font-size: 15px;
+            padding: 3px 7px;
           }
         }
       `}</style>
