@@ -175,7 +175,7 @@ export default function Main() {
                     justify="between"
                     round="10px"
                     background={videoDuration ? 'white' : 'rgba(183, 183, 183, 0.15)'}
-                    height={isMobile ? '34px' : '48px'}
+                    height={isMobile ? '40px' : '48px'}
                   >
                     {videoDuration &&
                       (isMobile ? (
@@ -419,7 +419,7 @@ export default function Main() {
 
         @media (max-width: 700px) {
           main {
-            height: calc(100vh - 90px);
+            height: calc(100vh - 120px);
           }
 
           h1 {
@@ -434,6 +434,7 @@ export default function Main() {
 
           main {
             padding: 10px;
+            padding-bottom: 30px;
           }
 
           .url-preview {

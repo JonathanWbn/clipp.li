@@ -47,7 +47,7 @@ export default function Input({ error, ...props }) {
           }
 
           .input-wrapper > .validation-error {
-            bottom: 2px;
+            top: 2px;
             right: 6px;
             font-size: 9px;
           }
