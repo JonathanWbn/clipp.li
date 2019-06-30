@@ -126,13 +126,20 @@ export default function Main() {
               name="youtubeLink"
               onChange={e => setFormValues({ ...formValues, youtubeLink: e.target.value })}
               placeholder="YouTube URL"
-              error={errors.youtubeLink}
+              error={errors.youtubeLink || ''}
             />
           </div>
           <div className="row full">
             <Grommet theme={{}}>
               <Stack>
-                <Box direction="row" justify="between" round="10px" background="white" height="48px">
+                <Box
+                  direction="row"
+                  justify="between"
+                  round="10px"
+                  background={videoDuration ? 'white' : 'rgba(183, 183, 183, 0.15)'}
+                  height="48px"
+                  border={!videoDuration && { color: 'rgba(183, 183, 183, 0.15)', size: '3px' }}
+                >
                   {videoDuration &&
                     [...new Array(Math.ceil(videoDuration / step))].map((_v, index) => (
                       <Box key={index} pad="small">
@@ -155,8 +162,8 @@ export default function Main() {
             </Grommet>
           </div>
           <div className="row">
-            <Input value={formatSeconds(formValues.start)} readOnly />
-            <Input value={formatSeconds(formValues.end)} readOnly />
+            <Input value={videoDuration ? formatSeconds(formValues.start) : ''} readOnly disabled={!videoDuration} />
+            <Input value={videoDuration ? formatSeconds(formValues.end) : ''} readOnly disabled={!videoDuration} />
           </div>
           <div className="row">
             <div className="url-preview">
@@ -167,7 +174,7 @@ export default function Main() {
               name="slug"
               onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '').toLowerCase() })}
               placeholder="URL ending"
-              error={errors.slug}
+              error={errors.slug || ''}
             />
           </div>
           <div className="row">
