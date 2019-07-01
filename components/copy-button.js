@@ -1,6 +1,6 @@
 import { string } from 'prop-types'
 
-import { copyToClipboard } from '../utils'
+import { copyToClipboard } from '../utils/helpers'
 import Button from './button'
 
 export default function CopyButton({ value }) {

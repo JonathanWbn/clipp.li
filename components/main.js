@@ -1,13 +1,13 @@
 import axios from 'axios'
 import classnames from 'classnames'
 import { Box, Grommet, RangeSelector, Stack } from 'grommet'
-import { number } from 'prop-types'
 
-import { formatSeconds, getYoutubeId } from '../helpers'
-import { useMobile, useYoutubeVideoDuration } from '../hooks'
+import { formatSeconds, getYoutubeId } from '../utils/helpers'
+import { useMobile, useYoutubeVideoDuration } from '../utils/hooks'
 import Button from './button'
 import CopyButton from './copy-button'
 import Input from './input'
+import Time from './time'
 
 const initialFormValues = { youtubeLink: '', start: 0, end: 0, slug: '' }
 const validate = (values, hasValidUrl) => ({
@@ -15,16 +15,11 @@ const validate = (values, hasValidUrl) => ({
   slug: !values.slug && 'Required',
 })
 const hasErrors = errors => Object.values(errors).some(Boolean)
-
-function Time({ seconds }) {
-  return (
-    <Box pad="small" alignSelf="center">
-      <span style={{ fontFamily: 'monospace', fontSize: 14 }}>{formatSeconds(Math.round(seconds))}</span>
-    </Box>
+const focusOnFirstError = errors => {
+  const [firstInput] = Object.entries(errors).map(
+    ([key, value]) => value && document.querySelector(`input[name="${key}"]`)
   )
-}
-Time.propTypes = {
-  seconds: number,
+  if (firstInput) firstInput.focus()
 }
 
 export default function Main() {
@@ -61,10 +56,7 @@ export default function Main() {
     setErrors(newErrors)
 
     if (hasErrors(newErrors)) {
-      const [firstInput] = Object.entries(newErrors).map(
-        ([key, value]) => value && document.querySelector(`input[name="${key}"]`)
-      )
-      if (firstInput) firstInput.focus()
+      focusOnFirstError(newErrors)
     } else {
       setStatus('loading')
       axios
