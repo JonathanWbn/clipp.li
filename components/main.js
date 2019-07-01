@@ -82,7 +82,7 @@ export default function Main() {
   }
 
   return (
-    <>
+    <div className="wrapper">
       <main>
         <h1>More than just a clip.</h1>
         <p>Take clips from YouTube videos and turn them into short, beautiful links.</p>
@@ -189,16 +189,30 @@ export default function Main() {
           )}
         </form>
       </main>
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/videoseries?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG"
+        frameBorder="0"
+        allow="autoplay; encrypted-media"
+        allowFullscreen
+      ></iframe>
       <style jsx>{`
-        main {
+        .wrapper {
           height: calc(100vh - 200px);
           width: 100vw;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-around;
+        }
+
+        main {
+          height: 100%;
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          padding: 20px;
-          padding-right: 25%;
         }
 
         form {
@@ -372,6 +386,6 @@ export default function Main() {
           }
         }
       `}</style>
-    </>
+    </div>
   )
 }
