@@ -3,7 +3,7 @@ import classnames from 'classnames'
 import { Box, Grommet, RangeSelector, Stack } from 'grommet'
 
 import { formatSeconds, getYoutubeId } from '../utils/helpers'
-import { useMobile, useYoutubeVideoDuration } from '../utils/hooks'
+import { useMobile, useWindowSize, useYoutubeVideoDuration } from '../utils/hooks'
 import Button from './button'
 import CopyButton from './copy-button'
 import Input from './input'
@@ -28,8 +28,10 @@ export default function Main() {
   const [status, setStatus] = React.useState(null)
   const [mostRecentSucess, setMostRecentSuccess] = React.useState(null)
 
-  const videoDuration = useYoutubeVideoDuration(getYoutubeId(formValues.youtubeLink))
+  const youtubeId = getYoutubeId(formValues.youtubeLink)
+  const videoDuration = useYoutubeVideoDuration(youtubeId)
   const isMobile = useMobile()
+  const { width: screenWidth } = useWindowSize()
 
   const hasValidUrl = typeof videoDuration === 'number'
 
@@ -60,7 +62,7 @@ export default function Main() {
     } else {
       setStatus('loading')
       axios
-        .post('/clip', { videoId: getYoutubeId(youtubeLink), start: parseInt(start), end: parseInt(end), slug })
+        .post('/clip', { videoId: youtubeId, start: parseInt(start), end: parseInt(end), slug })
         .then(() => {
           setStatus('success')
           setMostRecentSuccess(slug)
@@ -189,14 +191,12 @@ export default function Main() {
           )}
         </form>
       </main>
-      <iframe
-        width="560"
-        height="315"
-        src="https://www.youtube.com/embed/videoseries?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG"
-        frameBorder="0"
-        allow="autoplay; encrypted-media"
-        allowFullscreen
-      ></iframe>
+      {!(screenWidth < 1000) &&
+        (hasValidUrl ? (
+          <img className="thumbnail" src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`} />
+        ) : (
+          <div className="thumbnail-fallback" />
+        ))}
       <style jsx>{`
         .wrapper {
           height: calc(100vh - 200px);
@@ -204,7 +204,7 @@ export default function Main() {
           display: flex;
           flex-direction: row;
           align-items: center;
-          justify-content: space-around;
+          justify-content: center;
         }
 
         main {
@@ -335,6 +335,21 @@ export default function Main() {
         .time.disabled > button {
           cursor: not-allowed;
           color: #a4a4a4;
+        }
+
+        .thumbnail {
+          object-fit: cover;
+          height: 250px;
+          width: 445px;
+          margin-left: 50px;
+          border-radius: 8px;
+          box-shadow: 27.1px 62.5px 125px -25px rgba(50, 50, 93, 0.5), 16.2px 37.5px 75px -37.5px rgba(0, 0, 0, 0.6);
+          transform: rotate3d(0.174, -0.985, 0, 15deg);
+        }
+
+        .thumbnail-fallback {
+          margin-left: 50px;
+          width: 445px;
         }
 
         @media (max-width: 700px) {
