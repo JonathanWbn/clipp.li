@@ -1,3 +1,4 @@
+import { Box } from 'grommet'
 import { number } from 'prop-types'
 
 import { formatSeconds } from '../utils/helpers'
