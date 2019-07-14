@@ -13,6 +13,6 @@
     "React": true
   },
   "rules": {
-    "react/jsx-no-undef": [true, { "allowGlobals": true }]
+    "react/jsx-no-undef": [2, { "allowGlobals": true }]
   }
 }
