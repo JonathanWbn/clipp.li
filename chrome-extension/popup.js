@@ -10,7 +10,7 @@ const getYoutubeId = () =>
   })
 const padNumber = num => String(num).padStart(2, 0)
 const formatSeconds = secs => {
-  const momentDuration = window.moment.duration(secs, 'seconds')
+  const momentDuration = window.moment.duration(+secs, 'seconds')
   const hours = momentDuration.hours()
   const minutes = momentDuration.minutes()
   const seconds = momentDuration.seconds()
@@ -19,6 +19,24 @@ const formatSeconds = secs => {
   const secondsString = padNumber(seconds)
 
   return `${hoursString}${minutesString}${secondsString}`
+}
+const HOURS = 'h:mm:ss'
+const MINUTES = 'm:ss'
+const SECONDS = 's'
+const getTimeFormat = duration => {
+  const momentDuration = window.moment.duration(duration, 'seconds')
+  const hours = momentDuration.hours()
+  const minutes = momentDuration.minutes()
+  if (hours) return HOURS
+  else if (minutes) return MINUTES
+  else return SECONDS
+}
+const formatForMoment = (value, format) => {
+  if (format === SECONDS) return `0:00:${value}`
+  else if (format === MINUTES) {
+    if (value.includes(':')) return `0:${value}`
+    else return `0:${formatSeconds(value)}`
+  } else return value
 }
 const getVideoDuration = async youtubeId => {
   const res = await fetch(
@@ -36,13 +54,9 @@ const getVideoDuration = async youtubeId => {
 ;(async () => {
   const form = document.querySelector('form')
 
-  const start = document.getElementById('start')
-  const end = document.getElementById('end')
-
-  const startSubtract = document.getElementById('start-subtract')
-  const startAdd = document.getElementById('start-add')
-  const endSubtract = document.getElementById('end-subtract')
-  const endAdd = document.getElementById('end-add')
+  const startInput = document.getElementById('start')
+  const endInput = document.getElementById('end')
+  const slugInput = document.getElementById('slug')
 
   const successMessage = document.getElementById('success')
   const failureMessage = document.getElementById('failure')
@@ -54,57 +68,70 @@ const getVideoDuration = async youtubeId => {
     let startTime = 0
     let endTime = videoDuration
 
-    const updateTimes = () => {
-      start.innerHTML = formatSeconds(startTime)
-      end.innerHTML = formatSeconds(endTime)
-    }
-    updateTimes()
+    const timeFormat = getTimeFormat(videoDuration)
 
-    startSubtract.onclick = () => {
-      if (startTime === 0) return
-      startTime--
-      updateTimes()
+    const clearErrors = () => {
+      startInput.classList.remove('error')
+      endInput.classList.remove('error')
+      slugInput.classList.remove('error')
     }
-    startAdd.onclick = () => {
-      if (startTime === endTime - 1) return
-      startTime++
-      updateTimes()
+
+    startInput.onchange = clearErrors
+    endInput.onchange = clearErrors
+    slugInput.onchange = clearErrors
+
+    startInput.onblur = () => {
+      const duration = window.moment.duration(formatForMoment(startInput.value, timeFormat)).asSeconds()
+      startInput.value = formatSeconds(duration)
+      startTime = duration
     }
-    endSubtract.onclick = () => {
-      if (endTime === startTime + 1) return
-      endTime--
-      updateTimes()
+    endInput.onblur = () => {
+      const duration = window.moment.duration(formatForMoment(endInput.value, timeFormat)).asSeconds()
+      endInput.value = formatSeconds(duration)
+      endTime = duration
     }
-    endAdd.onclick = () => {
-      if (endTime === videoDuration) return
-      endTime++
-      updateTimes()
+
+    startInput.value = formatSeconds(startTime)
+    endInput.value = formatSeconds(videoDuration)
+    startInput.placeholder = timeFormat
+
+    const showStartError = error => {
+      startInput.classList.add('error')
+    }
+    const showEndError = error => {
+      endInput.classList.add('error')
+    }
+    const showSlugError = error => {
+      slugInput.classList.add('error')
     }
 
     form.onsubmit = function(event) {
       event.preventDefault()
-      const slug = document.getElementById('slug').value
-      window.chrome.tabs.query({ active: true, currentWindow: true }, function() {
-        fetch('https://clipp.li/clip', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            slug,
-            start: startTime,
-            end: endTime,
-            videoId,
-          }),
-        })
-          .then(res => res.json())
-          .then(() => {
-            successMessage.style.display = 'block'
-            setTimeout(() => (successMessage.style.display = 'none'), 1500)
-          })
-          .catch(() => {
-            failureMessage.style.display = 'block'
-            setTimeout(() => (failureMessage.style.display = 'none'), 1500)
-          })
+      const slug = slugInput.value
+
+      if (endTime <= startTime) return showEndError('The end time must be bigger than the start time.')
+      if (startTime > videoDuration) return showStartError("Start time can't be bigger than video duration")
+      if (endTime > videoDuration) return showEndError("End time can't be bigger than video duration")
+      if (!slug) return showSlugError('Please provide a slug.')
+      fetch('https://clipp.li/clip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          start: startTime,
+          end: endTime,
+          videoId,
+        }),
       })
+        .then(res => res.json())
+        .then(() => {
+          successMessage.style.display = 'block'
+          setTimeout(() => (successMessage.style.display = 'none'), 1500)
+        })
+        .catch(() => {
+          failureMessage.style.display = 'block'
+          setTimeout(() => (failureMessage.style.display = 'none'), 1500)
+        })
     }
   } else {
     form.style.display = 'none'

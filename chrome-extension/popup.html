@@ -5,7 +5,6 @@
       * {
         box-sizing: border-box;
       }
-
       body {
         background-color: #f5f5f5;
         padding: 20px;
@@ -47,42 +46,21 @@
         outline: none;
         width: 270px;
       }
-
+      input.error {
+        border: 2px solid red;
+      }
       .row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 10px;
         width: 270px;
       }
-        
-      .time {
-        background-color: white;
-        border-radius: 6px;
-        display: flex;
-        height: 30px;
+      .row input {
         width: 130px;
       }
-
-      .time .value {
-        flex-grow: 1;
-        display: flex;
-        align-items: center;
-        padding: 4px 12px;
-        color: #333;
-        font-weight: bold;
-        font-size: 14px;
-      }
-      .time > button {
-        background-color: unset;
-        border: none;
-        font-size: 14px;
-        font-weight: bold;
-        color: #333;
-        cursor: pointer;
-        width: 25px;
-        border-left: 2px solid rgba(183, 183, 183, 0.15);
-        outline: none;
+      label span {
+        font-weight: 500;
+        padding: 5px;
       }
     </style>
   </head>
@@ -90,24 +68,14 @@
     <h3 id="invalid-link-errorr" style="display:none">This is not a YouTube video.</h1>
     <form>
       <div class="row">
-        <div class="time">
-          <div class="value" id="start"></div>
-          <button type="button" id="start-subtract">
-            -
-          </button>
-          <button type="button" id="start-add">
-            +
-          </button>
-        </div>
-        <div class="time">
-          <div class="value" id="end"></div>
-          <button type="button" id="end-subtract">
-            -
-          </button>
-          <button type="button" id="end-add">
-            +
-          </button>
-        </div>
+        <label>
+          <span>Start</span>
+          <input id="start" placeholder="h:mm:ss"/>
+        </label>
+        <label>
+          <span>End</span>
+          <input id="end" placeholder="h:mm:ss"/>
+        </label>
       </div>
       <input placeholder="URL ending" name="slug" id="slug" />
       <button class="submit">Create link</button>
