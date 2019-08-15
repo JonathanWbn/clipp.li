@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
   if (clip) {
     await saveRedirect()
 
-    const redirectUrl = `https://www.youtube.com/embed/${clip.videoId}?start=${clip.start}&end=${clip.end}`
+    const redirectUrl = `https://www.youtube.com/embed/${clip.videoId}?start=${clip.start}&end=${clip.end}&autoplay=1`
 
     res.writeHead(302, { Location: redirectUrl })
     res.end()

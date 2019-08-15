@@ -52,7 +52,7 @@ export default function Main() {
   }, [videoDuration])
 
   const handleSubmit = () => {
-    const { youtubeLink, start, end, slug } = formValues
+    const { start, end, slug } = formValues
 
     const newErrors = validate(formValues, hasValidUrl)
     setErrors(newErrors)

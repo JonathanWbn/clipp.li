@@ -1,6 +1,16 @@
 const { connectToDatabase } = require('./db')
+const bodyParser = require('body-parser')
+const express = require('express')
+const cors = require('cors')
 
-module.exports = async (req, res) => {
+const app = express()
+
+app
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(bodyParser.json())
+  .use(cors())
+
+app.all('*', async (req, res) => {
   const slug = req.body.slug.replace(/ /g, '').toLowerCase()
 
   const db = await connectToDatabase()
@@ -18,4 +28,6 @@ module.exports = async (req, res) => {
     })
     res.json({ success: true })
   }
-}
+})
+
+module.exports = app

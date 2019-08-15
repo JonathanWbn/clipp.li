@@ -10,9 +10,10 @@
     "ecmaVersion": 9
   },
   "globals": {
-    "React": true
+    "React": true,
+    "chrome": true
   },
   "rules": {
-    "react/jsx-no-undef": [true, { "allowGlobals": true }]
+    "react/jsx-no-undef": [2, { "allowGlobals": true }]
   }
 }
