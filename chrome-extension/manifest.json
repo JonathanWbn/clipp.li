@@ -2,11 +2,7 @@
   "name": "clippli",
   "version": "1.0",
   "description": "URL shortener for embedded YouTube clips.",
-  "permissions": ["activeTab", "declarativeContent", "storage"],
-  "background": {
-    "scripts": ["background.js"],
-    "persistent": false
-  },
+  "permissions": ["activeTab"],
   "browser_action": {
     "default_popup": "popup.html",
     "default_icon": {
