@@ -57,6 +57,7 @@ const getVideoDuration = async youtubeId => {
   const startInput = document.getElementById('start')
   const endInput = document.getElementById('end')
   const slugInput = document.getElementById('slug')
+  const successLink = document.getElementById('success-link')
 
   const successMessage = document.getElementById('success')
   const failureMessage = document.getElementById('failure')
@@ -95,43 +96,41 @@ const getVideoDuration = async youtubeId => {
     endInput.value = formatSeconds(videoDuration)
     startInput.placeholder = timeFormat
 
-    const showStartError = error => {
+    const showStartError = () => {
       startInput.classList.add('error')
     }
-    const showEndError = error => {
+    const showEndError = () => {
       endInput.classList.add('error')
     }
-    const showSlugError = error => {
+    const showSlugError = () => {
       slugInput.classList.add('error')
     }
 
-    form.onsubmit = function(event) {
+    form.onsubmit = async function(event) {
       event.preventDefault()
       const slug = slugInput.value
+      successMessage.style.display = 'none'
 
       if (endTime <= startTime) return showEndError('The end time must be bigger than the start time.')
       if (startTime > videoDuration) return showStartError("Start time can't be bigger than video duration")
       if (endTime > videoDuration) return showEndError("End time can't be bigger than video duration")
       if (!slug) return showSlugError('Please provide a slug.')
-      fetch('https://clipp.li/clip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+
+      try {
+        await window.axios.post('https://clipp.li/clip', {
           slug,
           start: startTime,
           end: endTime,
           videoId,
-        }),
-      })
-        .then(res => res.json())
-        .then(() => {
-          successMessage.style.display = 'block'
-          setTimeout(() => (successMessage.style.display = 'none'), 1500)
         })
-        .catch(() => {
-          failureMessage.style.display = 'block'
-          setTimeout(() => (failureMessage.style.display = 'none'), 1500)
-        })
+        successMessage.style.display = 'block'
+        successLink.href = `https://clipp.li/${slug}`
+        successLink.innerText = `https://clipp.li/${slug}`
+      } catch (err) {
+        failureMessage.style.display = 'block'
+        failureMessage.innerText = err.response.data || 'Something went wrong.'
+        setTimeout(() => (failureMessage.style.display = 'none'), 1500)
+      }
     }
   } else {
     form.style.display = 'none'

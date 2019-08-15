@@ -77,12 +77,13 @@
           <input id="end" placeholder="h:mm:ss"/>
         </label>
       </div>
-      <input placeholder="URL ending" name="slug" id="slug" />
+      <input placeholder="URL ending" name="slug" id="slug" autofocus autocomplete="off" />
       <button class="submit">Create link</button>
-      <div id="success" style="display:none">Success</div>
+      <div id="success" style="display:none">Success: <a id="success-link" target="_blank"></a></div>
       <div id="failure" style="display:none">Failure</div>
     </form>
     <script src="moment.js"></script>
+    <script src="axios.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>
