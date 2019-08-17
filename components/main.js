@@ -9,10 +9,12 @@ import CopyButton from './copy-button'
 import Input from './input'
 import Time from './time'
 
+const isValidSlug = slug => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+
 const initialFormValues = { youtubeLink: '', start: 0, end: 0, slug: '' }
 const validate = (values, hasValidUrl) => ({
   youtubeLink: (!values.youtubeLink && 'Required') || (!hasValidUrl && 'Invalid URL'),
-  slug: !values.slug && 'Required',
+  slug: (!values.slug && 'Required') || (!isValidSlug(values.slug) && 'Invalid slug'),
 })
 const hasErrors = errors => Object.values(errors).some(Boolean)
 const focusOnFirstError = errors => {
