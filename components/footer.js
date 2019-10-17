@@ -5,8 +5,12 @@ export default function Footer() {
         <a href="https://github.com/JonathanWbn/clipp.li" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
           GitHub
         </a>
-        <a href="https://twitter.com/JoniWieben" target="_blank" rel="noopener noreferrer">
-          Twitter
+        <a
+          href="https://chrome.google.com/webstore/detail/clippli/bcnmhnmdkkonjeeaiobhkbmclbpdllmf"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Chrome Extension
         </a>
         <a href="/impressum">Impressum</a>
       </footer>
