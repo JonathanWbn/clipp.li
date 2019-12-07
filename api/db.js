@@ -4,7 +4,6 @@ const MongoClient = require('mongodb').MongoClient
 let cachedDb = null
 
 async function connectToDatabase() {
-  console.log('process.env.MONGO_URL', process.env.MONGO_URL)
   const mongoURL = `${process.env.MONGO_URL}/clips?retryWrites=true&w=majority`
 
   if (cachedDb) return cachedDb
