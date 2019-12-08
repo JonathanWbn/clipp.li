@@ -1,4 +1,7 @@
 {
   "version": 2,
-  "name": "clipp.li"
+  "name": "clipp.li",
+  "env": {
+    "MONGO_URL": "@mongodb-uri-pingpong"
+  }
 }
