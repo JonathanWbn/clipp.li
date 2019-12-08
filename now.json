@@ -1,9 +1,4 @@
 {
   "version": 2,
-  "name": "clipp.li",
-  "builds": [{ "src": "next.config.js", "use": "@now/next" }, { "src": "api/*.js", "use": "@now/node" }],
-  "routes": [
-    { "src": "/clip", "methods": ["POST", "OPTIONS"], "dest": "api/clip.js" },
-    { "src": "/(?!(impressum))[a-z0-9]+", "methods": ["GET"], "dest": "api/redirect.js" }
-  ]
+  "name": "clipp.li"
 }

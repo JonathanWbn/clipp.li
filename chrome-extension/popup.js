@@ -117,7 +117,7 @@ const getVideoDuration = async youtubeId => {
       if (!slug) return showSlugError('Please provide a slug.')
 
       try {
-        await window.axios.post('https://clipp.li/clip', {
+        await window.axios.post('https://clipp.li/api/clip', {
           slug,
           start: startTime,
           end: endTime,

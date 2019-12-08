@@ -65,7 +65,7 @@ export default function Main() {
     } else {
       setStatus('loading')
       axios
-        .post('/clip', { videoId: youtubeId, start: parseInt(start), end: parseInt(end), slug })
+        .post('/api/clip', { videoId: youtubeId, start: parseInt(start), end: parseInt(end), slug })
         .then(() => {
           setStatus('success')
           setMostRecentSuccess(slug)

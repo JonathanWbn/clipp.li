@@ -23,6 +23,7 @@ export default function CopyButton({ value }) {
     </Button>
   )
 }
+
 CopyButton.propTypes = {
   value: string,
 }

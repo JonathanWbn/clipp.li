@@ -1,9 +1,7 @@
-const { connectToDatabase } = require('./db')
-const url = require('url')
+import { connectToDatabase } from '../../db'
 
-module.exports = async (req, res) => {
-  const { pathname } = url.parse(req.url)
-  const slug = pathname.substr(1).toLowerCase()
+export default async (req, res) => {
+  const { slug } = req.query
 
   const db = await connectToDatabase()
   const clipsCollection = await db.collection('clips')

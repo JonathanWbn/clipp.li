@@ -1,4 +1,4 @@
-import App, { Container } from 'next/app'
+import App from 'next/app'
 import Head from 'next/head'
 import React from 'react'
 
@@ -7,9 +7,9 @@ class MyApp extends App {
     const { Component, pageProps } = this.props
 
     return (
-      <Container>
+      <>
         <Head>
-          <link rel="shortcut icon" type="image/png" href="/static/favicon.png" />
+          <link rel="shortcut icon" type="image/png" href="/favicon.png" />
           <meta name="viewport" content="initial-scale=1.0, width=device-width" />
           <meta name="description" content="Turn YouTube clips into short and beautiful URL's." />
           <meta name="keywords" content="clippli youtube clip crop bitly short" />
@@ -53,7 +53,7 @@ class MyApp extends App {
             background: white;
           }
         `}</style>
-      </Container>
+      </>
     )
   }
 }
