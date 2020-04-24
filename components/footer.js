@@ -12,7 +12,7 @@ export default function Footer() {
         >
           Chrome Extension
         </a>
-        <a href="/impressum">Impressum</a>
+        <a href="/legal/impressum">Impressum</a>
       </footer>
       <style jsx>{`
         footer {
