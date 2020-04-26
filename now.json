@@ -1,7 +1,4 @@
 {
   "version": 2,
-  "env": {
-    "MONGO_URL": "@mongodb-uri-clippli"
-  },
   "redirects": [{ "source": "/:slug", "destination": "/api/:slug" }]
 }
