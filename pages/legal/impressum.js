@@ -13,7 +13,7 @@ export default function Impressum() {
         <p>
           Telefon: +49 17655501946
           <br />
-          E-Mail: <a href="mailto:joni.wieben@icloud.com">joni.wieben@icloud.com</a>
+          E-Mail: <a href="mailto:jwieben@hey.com">jwieben@hey.com</a>
           <br />
         </p>
       </main>
