@@ -3,8 +3,6 @@
 This is a website which allows one to select a specific time range of a YouTube video and make it accessible under a custom slug. It's like bit.ly, but for YouTube clips.
 You can check it out here: [clipp.li](https://clipp.li)
 
-I've also build a Chrome extension for it: [Chrome extension](https://chrome.google.com/webstore/detail/clippli/bcnmhnmdkkonjeeaiobhkbmclbpdllmf)
-
 ### Stack
 
 The backend is a serverless Node API connected to a MongoDB database.
