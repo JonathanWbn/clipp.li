@@ -2,17 +2,12 @@ export default function Footer() {
   return (
     <>
       <footer>
+        <a href="https://jonathanwieben.com/" target="_blank" rel="noopener noreferrer">
+          Author
+        </a>
         <a href="https://github.com/JonathanWbn/clipp.li" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
           GitHub
         </a>
-        <a
-          href="https://chrome.google.com/webstore/detail/clippli/bcnmhnmdkkonjeeaiobhkbmclbpdllmf"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Chrome Extension
-        </a>
-        <a href="/legal/impressum">Impressum</a>
       </footer>
       <style jsx>{`
         footer {
@@ -20,7 +15,7 @@ export default function Footer() {
           justify-content: center;
           align-items: center;
           width: 100%;
-          height: 120px;
+          height: 60px;
         }
 
         footer a {
@@ -43,6 +38,10 @@ export default function Footer() {
         @media (max-width: 700px) {
           footer {
             height: 60px;
+          }
+
+          footer a {
+            font-size: 12px;
           }
         }
       `}</style>

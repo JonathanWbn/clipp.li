@@ -9,7 +9,7 @@ class MyApp extends App {
     return (
       <>
         <Head>
-          <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+          <link rel="shortcut icon" type="image/png" href="/static/favicon.png" />
           <meta name="viewport" content="initial-scale=1.0, width=device-width" />
           <meta name="description" content="Turn YouTube clips into short and beautiful URL's." />
           <meta name="keywords" content="clippli youtube clip crop bitly short" />

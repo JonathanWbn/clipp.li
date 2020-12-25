@@ -227,7 +227,7 @@ export default function Main() {
         ))}
       <style jsx>{`
         .wrapper {
-          height: calc(100vh - 200px);
+          height: calc(100vh - 140px);
           width: 100vw;
           display: flex;
           flex-direction: row;
@@ -262,7 +262,7 @@ export default function Main() {
 
         p {
           font-size: 18px;
-          margin-bottom: 40px;
+          margin-bottom: 25px;
           width: 100%;
           max-width: 480px;
         }
@@ -304,7 +304,7 @@ export default function Main() {
           width: 100%;
           position: absolute;
           left: 0;
-          bottom: -90px;
+          bottom: -80px;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -396,6 +396,10 @@ export default function Main() {
         }
 
         @media (max-width: 700px) {
+          .wrapper {
+            height: calc(100vh - 120px);
+          }
+
           main {
             height: calc(100vh - 120px);
           }
