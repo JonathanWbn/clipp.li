@@ -101,7 +101,7 @@ export default function Main() {
     <div className="wrapper">
       <main>
         <h1>More than just a clip.</h1>
-        <p>Take clips from YouTube videos and turn them into short, beautiful links.</p>
+        <p>Take clips from YouTube videos and turn them into short links.</p>
         <form>
           <div className="row full">
             <Input
