@@ -2,6 +2,7 @@ import axios from 'axios'
 import classnames from 'classnames'
 import { Box, Grommet, RangeSelector, Stack } from 'grommet'
 import randomstring from 'randomstring'
+import React from 'react'
 
 import { formatSeconds, getYoutubeId } from '../utils/helpers'
 import { useMobile, useWindowSize, useYoutubeVideoDuration } from '../utils/hooks'
@@ -10,15 +11,15 @@ import CopyButton from './copy-button'
 import Input from './input'
 import Time from './time'
 
-const isValidSlug = slug => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+const isValidSlug = (slug) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
 
 const initialFormValues = { youtubeLink: '', start: 0, end: 0, slug: '' }
 const validate = (values, hasValidUrl) => ({
   youtubeLink: (!values.youtubeLink && 'Required') || (!hasValidUrl && 'Invalid URL'),
   slug: (!values.slug && 'Required') || (!isValidSlug(values.slug) && 'Invalid slug'),
 })
-const hasErrors = errors => Object.values(errors).some(Boolean)
-const focusOnFirstError = errors => {
+const hasErrors = (errors) => Object.values(errors).some(Boolean)
+const focusOnFirstError = (errors) => {
   const [firstInput] = Object.entries(errors).map(
     ([key, value]) => value && document.querySelector(`input[name="${key}"]`)
   )
@@ -70,7 +71,7 @@ export default function Main() {
           setStatus('success')
           setMostRecentSuccess(slug)
         })
-        .catch(error => {
+        .catch((error) => {
           setErrors({ slug: error.response.data || error.message })
 
           const slugInput = document.querySelector('input[name="slug"]')
@@ -107,7 +108,7 @@ export default function Main() {
             <Input
               value={formValues.youtubeLink}
               name="youtubeLink"
-              onChange={e => setFormValues({ ...formValues, youtubeLink: e.target.value })}
+              onChange={(e) => setFormValues({ ...formValues, youtubeLink: e.target.value })}
               placeholder="YouTube URL"
               error={errors.youtubeLink || ''}
             />
@@ -182,7 +183,7 @@ export default function Main() {
             <Input
               value={formValues.slug}
               name="slug"
-              onChange={e => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '').toLowerCase() })}
+              onChange={(e) => setFormValues({ ...formValues, slug: e.target.value.replace(/ /g, '').toLowerCase() })}
               placeholder="URL ending"
               error={errors.slug || ''}
             />

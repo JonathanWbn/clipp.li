@@ -1,5 +1,6 @@
 import { Box } from 'grommet'
 import { number } from 'prop-types'
+import React from 'react'
 
 import { formatSeconds } from '../utils/helpers'
 

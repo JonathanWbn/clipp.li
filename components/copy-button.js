@@ -1,4 +1,5 @@
 import { string } from 'prop-types'
+import React from 'react'
 
 import { copyToClipboard } from '../utils/helpers'
 import Button from './button'

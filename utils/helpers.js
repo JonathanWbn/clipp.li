@@ -2,11 +2,11 @@ import moment from 'moment'
 
 const youtubeIdRE = /.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#&?]*).*/
 
-export const getYoutubeId = link => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
+export const getYoutubeId = (link) => (link.match(youtubeIdRE) ? link.match(youtubeIdRE)[1] : null)
 
-const padNumber = num => String(num).padStart(2, 0)
+const padNumber = (num) => String(num).padStart(2, 0)
 
-export const formatSeconds = secs => {
+export const formatSeconds = (secs) => {
   const momentDuration = moment.duration(secs, 'seconds')
   const hours = momentDuration.hours()
   const minutes = momentDuration.minutes()

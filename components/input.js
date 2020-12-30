@@ -1,5 +1,6 @@
 import classnames from 'classnames'
 import { string } from 'prop-types'
+import React from 'react'
 
 export default function Input({ error, ...props }) {
   return (

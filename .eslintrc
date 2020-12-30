@@ -1,5 +1,10 @@
 {
   "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "settings":{
+    "react": {
+      "version": "detect"
+    }
+  },
   "env": {
     "es6": true,
     "node": true,
