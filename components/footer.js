@@ -7,6 +7,13 @@ export default function Footer() {
         <a href="https://jonathanwieben.com/" target="_blank" rel="noopener noreferrer">
           Author
         </a>
+        <a
+          href="https://www.notion.so/jwieben/Impressum-7be1b0e1a1384c1cb9362bd1aef963d1"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Impressum
+        </a>
         <a href="https://github.com/JonathanWbn/clipp.li" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
           GitHub
         </a>
